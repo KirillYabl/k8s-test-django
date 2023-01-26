@@ -15,8 +15,8 @@ $ docker-compose up
 В новом терминале не выключая сайт запустите команды для настройки базы данных:
 
 ```shell-session
-$ docker-compose run web ./manage.py migrate  # создаём/обновляем таблицы в БД
-$ docker-compose run web ./manage.py createsuperuser
+$ docker-compose run web python3 ./manage.py migrate  # создаём/обновляем таблицы в БД
+$ docker-compose run web python3 ./manage.py createsuperuser
 ```
 
 Для тонкой настройки Docker Compose используйте переменные окружения. Их названия отличаются от тех, что задаёт docker-образа, сделано это чтобы избежать конфликта имён. Внутри docker-compose.yaml настраиваются сразу несколько образов, у каждого свои переменные окружения, и поэтому их названия могут случайно пересечься. Чтобы не было конфликтов к названиям переменных окружения добавлены префиксы по названию сервиса. Список доступных переменных можно найти внутри файла [`docker-compose.yml`](./docker-compose.yml).
