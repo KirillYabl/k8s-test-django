@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-app-deployment
+  labels:
+    name: django
+    instance: django-k8s
+    version: "1.0.0"
+    component: server
+    part-of: site
+    managed-by: k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - name: djangoapp
+        image: django_app:1655
+        envFrom:
+        - configMapRef:
+            name: django-config-20230127-v2
+        ports:
+        - containerPort: 80

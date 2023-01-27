@@ -2,9 +2,9 @@
 
 Докеризированный сайт на Django для экспериментов с Kubernetes.
 
-Внутри конейнера Django запускается с помощью Nginx Unit, не путать с Nginx. Сервер Nginx Unit выполняет сразу две функции: как веб-сервер он раздаёт файлы статики и медиа, а в роли сервера-приложений он запускает Python и Django. Таким образом Nginx Unit заменяет собой связку из двух сервисов Nginx и Gunicorn/uWSGI. [Подробнее про Nginx Unit](https://unit.nginx.org/).
+Внутри контейнера Django запускается с помощью Nginx Unit, не путать с Nginx. Сервер Nginx Unit выполняет сразу две функции: как веб-сервер он раздаёт файлы статики и медиа, а в роли сервера-приложений он запускает Python и Django. Таким образом Nginx Unit заменяет собой связку из двух сервисов Nginx и Gunicorn/uWSGI. [Подробнее про Nginx Unit](https://unit.nginx.org/).
 
-## Как запустить dev-версию
+## Как запустить dev-версию в docker-compose
 
 Запустите базу данных и сайт:
 
@@ -20,6 +20,53 @@ $ docker-compose run web python3 ./manage.py createsuperuser
 ```
 
 Для тонкой настройки Docker Compose используйте переменные окружения. Их названия отличаются от тех, что задаёт docker-образа, сделано это чтобы избежать конфликта имён. Внутри docker-compose.yaml настраиваются сразу несколько образов, у каждого свои переменные окружения, и поэтому их названия могут случайно пересечься. Чтобы не было конфликтов к названиям переменных окружения добавлены префиксы по названию сервиса. Список доступных переменных можно найти внутри файла [`docker-compose.yml`](./docker-compose.yml).
+
+## Как запустить dev-версию в minikube
+
+Создать конфиг (например в папке config внутри папки kubernetes)
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config-v1 # в названии номер версии для дальнейшего обновления
+  labels:
+    name: django
+    instance: django-k8s
+    version: "1.0.0"
+    component: config
+    part-of: server
+    managed-by: k8s
+data:
+  SECRET_KEY: "" # смотреть секцию при переменные окружения 
+  DEBUG: "TRUE" # смотреть секцию при переменные окружения
+  DATABASE_URL: "" # смотреть секцию при переменные окружения
+  ALLOWED_HOSTS: "*"
+```
+
+Загрузите конфиг, деплоймент и сервис в minikube
+
+```shell-session
+$ kubectl apply -f .\kubernetes\config\configmap.yaml
+$ kubectl apply -f .\kubernetes\deployment.yaml
+$ kubectl apply -f .\kubernetes\service.yaml
+```
+
+## Как обновить dev-версию в minikube
+
+Если меняются переменные окружения, то измените версию в названии конфига (metadata name), а затем
+загрузите новую версию конфига в minikube
+
+```shell-session
+$ kubectl apply -f .\kubernetes\config\configmap.yaml
+```
+
+Если изменился образ и/или изменился конфиг, то измените название конфига при его изменении, а затем
+загрузите снова deployment, при этом обновление будет без остановки сервиса
+
+```shell-session
+$ kubectl apply -f .\kubernetes\deployment.yaml
+```
 
 ## Переменные окружения
 
