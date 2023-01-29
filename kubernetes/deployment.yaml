@@ -21,9 +21,9 @@ spec:
     spec:
       containers:
       - name: djangoapp
-        image: django_app:1655
+        image: django_app:minikube
         envFrom:
         - configMapRef:
-            name: django-config-20230127-v2
+            name: django-config-20230129-v3
         ports:
         - containerPort: 80

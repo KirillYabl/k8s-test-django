@@ -23,6 +23,12 @@ $ docker-compose run web python3 ./manage.py createsuperuser
 
 ## Как запустить dev-версию в minikube
 
+Создать docker образ
+
+```shell-session
+$ minikube image build -t django_app . 
+```
+
 Создать конфиг (например в папке config внутри папки kubernetes)
 
 ```yaml
