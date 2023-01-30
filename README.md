@@ -50,12 +50,13 @@ data:
   ALLOWED_HOSTS: "*"
 ```
 
-Загрузите конфиг, деплоймент и сервис в minikube
+Загрузите конфиг, деплоймент, сервис и задачу по ежедневному удалению сессий django в minikube
 
 ```shell-session
 $ kubectl apply -f .\kubernetes\config\configmap.yaml
 $ kubectl apply -f .\kubernetes\deployment.yaml
 $ kubectl apply -f .\kubernetes\service.yaml
+$ kubectl apply -f .\kubernetes\jobs\clearsessions.yaml
 ```
 
 ## Как обновить dev-версию в minikube
@@ -72,6 +73,12 @@ $ kubectl apply -f .\kubernetes\config\configmap.yaml
 
 ```shell-session
 $ kubectl apply -f .\kubernetes\deployment.yaml
+```
+
+Также при изменении образа необходимо пересоздать cronjob по запуску удаления сессий в django
+
+```shell-session
+$ kubectl apply -f .\kubernetes\jobs\clearsessions.yaml
 ```
 
 ## Переменные окружения

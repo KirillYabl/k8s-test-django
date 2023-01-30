@@ -24,6 +24,6 @@ spec:
         image: django_app:minikube
         envFrom:
         - configMapRef:
-            name: django-config-20230129-v3
+            name: django-config-20230130-v4
         ports:
         - containerPort: 80
