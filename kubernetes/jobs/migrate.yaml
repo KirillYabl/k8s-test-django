@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+      - name: django-app-migrate
+        image: django_app:minikube
+        envFrom:
+          - configMapRef:
+              name: django-config-20230130-v4
+        imagePullPolicy: IfNotPresent
+        command:
+          - python
+          - manage.py
+          - migrate
+          - --no-input
+      restartPolicy: Never

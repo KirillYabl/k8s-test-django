@@ -50,7 +50,11 @@ data:
   ALLOWED_HOSTS: "*"
 ```
 
-Загрузите конфиг, деплоймент, сервис и задачу по ежедневному удалению сессий django в minikube
+Загрузите 
+- конфиг
+- деплоймент
+- сервис
+- задачу по ежедневному удалению сессий django в minikube
 
 ```shell-session
 $ kubectl apply -f .\kubernetes\config\configmap.yaml
@@ -79,6 +83,11 @@ $ kubectl apply -f .\kubernetes\deployment.yaml
 
 ```shell-session
 $ kubectl apply -f .\kubernetes\jobs\clearsessions.yaml
+```
+
+При обновлении схемы данных нужно запустить команду миграции (перед запуском желательно убедиться, что указана актуальная версия конфига)
+```shell-session
+$ kubectl apply -f .\kubernetes\jobs\migrate.yaml
 ```
 
 ## Переменные окружения
