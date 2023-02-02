@@ -13,7 +13,7 @@ spec:
             image: django_app:minikube
             envFrom:
               - configMapRef:
-                  name: django-config-20230130-v4
+                  name: django-config-20230202-v7
             imagePullPolicy: IfNotPresent
             command:
             - python

@@ -23,14 +23,39 @@ $ docker-compose run web python3 ./manage.py createsuperuser
 
 ## Как запустить dev-версию в minikube
 
-Создать docker образ
+Запустить minikube и установить плагин для ингресс
+```
+minikube start --driver=virtualbox --no-vtx-check
+minikube addons enable ingress
+```
+Установить helm, репозиторий БД и релиз БД
+```
+choco install kubernetes-helm
+helm repo add postgres-repo https://charts.bitnami.com/bitnami
+helm install postgres-release postgres-repo/postgresql --set volumePermissions.enabled=true
+```
+Узнать пароль для запуска под с БД
+```
+echo kubectl get secret --namespace default postgres-release-postgresql -o jsonpath="{.data.postgres-password}" İ base64 --decode
+```
+Запустить под с БД, подставив вместо $POSTGRES_PASSWORD узнанный на предыдущем шаге пароль
+```
+kubectl run postgres-release-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:15.1.0-debian-11-r30 --env="PGPASSWORD=$POSTGRES_PASSWORD" --command -- psql --host postgres-release-postgresql -U postgres -d postgres -p 5432
+```
 
-```shell-session
-$ minikube image build -t django_app . 
+Создать БД и пользователя (имя БД, пользователя и пароль можно изменить, но также нужно изменить их в конфиге далее)
+```
+CREATE DATABASE test_k8s;
+CREATE USER test_k8s WITH ENCRYPTED PASSWORD 'OwOtBep9Frut';
+GRANT ALL PRIVILEGES ON DATABASE test_k8s TO test_k8s;
+```
+
+Создать docker образ
+```
+minikube image build -t django_app:minikube .\backend_main_django\
 ```
 
 Создать конфиг (например в папке config внутри папки kubernetes)
-
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -55,12 +80,15 @@ data:
 - деплоймент
 - сервис
 - задачу по ежедневному удалению сессий django в minikube
+- разовую задачу по миграции данных
+- ингресс
 
-```shell-session
-$ kubectl apply -f .\kubernetes\config\configmap.yaml
-$ kubectl apply -f .\kubernetes\deployment.yaml
-$ kubectl apply -f .\kubernetes\service.yaml
-$ kubectl apply -f .\kubernetes\jobs\clearsessions.yaml
+```
+kubectl apply -f .\kubernetes\config\configmapdjango.yaml
+kubectl apply -f .\kubernetes\deployment.yaml
+kubectl apply -f .\kubernetes\jobs\clearsessions.yaml
+kubectl apply -f .\kubernetes\service.yaml
+kubectl apply -f .\kubernetes\ingress.yaml
 ```
 
 ## Как обновить dev-версию в minikube
